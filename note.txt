@@ -1,0 +1,106 @@
+{% comment %} create clien id  {% endcomment %}
+
+# # Tao nguoi dung qua co so du lieu
+# password="`echo -n 'admin'|sha1sum|cut -d ' ' -f 1`"
+# mysql -D asterisk -e "INSERT INTO ampusers (username,password_sha1,sections) VALUES ('admin','$password','*');"
+
+# # tao nguoi dung qua post va lay cookie
+curl -X POST 'http://192.168.1.25:8080/admin/config.php' \
+    -d 'action=setup_admin&username=admin&password1=admin&password2=admin&email=vudat412@gmail.com&system_ident=VoIP+Server&auto_module_updates=enabled&auto_module_security_updates=enabled&unsigned_module_emails=enabled&update_every=saturday&update_period=4to8' \
+    -c /var/www/html/cookieLogin.json
+# # thiet lap ngon ngu
+curl -X POST 'http://192.168.1.25:8080/admin/config.php' \
+    -d 'username=admin&password=admin&oobeSoundLang=en&oobeGuiLang=en_US'
+
+# # tao api thong qua co so du lieu
+# passwordSC="`echo 'adminSC'|sha256sum| awk '{print $1}'`"
+# mysql -D asterisk -e "INSERT INTO api_applications (owner,name,description,grant_type,client_id,client_secret,redirect_uri,website,algo,allowed_scopes) VALUES (NULL,'API','GRAPH API','client_credentials','$passwordSC',SHA2('$passwordSC', 256),'','','sha256','gql');"
+# lấy key client_secret trong dbs
+# clientsecret="`mysql -ND asterisk -e "select client_secret from api_applications where name = 'API' and allowed_scopes = 'gql';"`"
+##################################################################################################################################################################
+# req lấy PHPSESSID Cookie Login
+# curl -X POST 'http://192.168.1.25:8080/admin/config.php' -d 'username=admin&password=admin' -c /var/ww/html/cookie.txt
+# cắt chuỗi
+# session="`cat cookie.txt | awk '{print $7}' | grep -v libcurl! | grep -v en_US`"
+##################################################################################################################################################################
+# tạo biến cookie tiện cắt chuỗi luôn :v
+cookie="$(curl -X POST -v --silent http://192.168.1.25:8080/admin/config.php \
+    -d 'username=admin&password=admin&oobeSoundLang=en&oobeGuiLang=en_US' --stderr - | grep expire | grep -oP 'PHPSESSID=([a-zA-Z0-90]+)' | awk -F "=" '{print $2}')"
+# curl từ biến và gán  tao key api_application 
+curl -X POST 'http://192.168.1.25:8080/admin/ajax.php?module=api&command=add_application' \
+    --header 'Referer: http://192.168.1.25:8080/admin/config.php?display=api' \
+    --cookie "PHPSESSID=$cookie" \
+    -d 'type=client_credentials&name=API&description=GRAPH+API&website=&redirect=&allowed_scopes=gql&user=' > token.json
+# cat chuoi client_id 
+clientID="`awk -F ":" '{print $5}' token.json | cut -d, -f1 | cut -d '"' -f2`"
+echo $clientID
+# cat chuoi client_secret
+clientSC="`awk -F ":" '{print $6}' token.json | cut -d, -f1 | cut -d '"' -f2`"
+echo $clientSC
+# Token API 
+curl -X POST \
+-H "Accept:*/*" \
+-d 'client_id=$clientID&client_secret=$clientSC&grant_type=client_credentials&scope=gql' \
+http://localhost:8080/admin/api/api/token
+
+
+vi /etc/asterisk/ari.conf
+[general]
+enabled = yes
+
+[aritest]
+type = user
+read_only = no
+password = testme
+password_format = plain
+
+vi /etc/asterisk/http.conf
+[general]
+enabled=yes
+bindaddr=0.0.0.0
+bindport=8088
+
+
+databases;
+mysql or mariadb || mysql -u root p root
+create databases
+    CREATE USER 'datv'@'%' IDENTIFIED BY 'vudat412'';
+    grant select on asteriskcdrdb.* TO 'datv'@'%'';
+    FLUSH PRIVILEGES;
+
+
+
+# Ubuntu Port
+iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p udp -m udp --dport 5060 -j ACCEPT
+iptables -A INPUT -p udp -m udp --dport 10000:65000 -j ACCEPT
+ufw allow 10000:65000/udp
+ufw allow 5060/udp
+# centos 7
+firewall-cmd --permanent --add-port=10000-65000/udp
+firewall-cmd --permanent --add-port=5060/udp
+
+# install sngrep for ubuntu 
+apt-get update && apt-get install -y lsb-release && apt-get clean all
+echo "deb http://packages.irontec.com/debian squeeze main" >> /etc/apt/sources.list 
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 90D20F5ED8C20040
+# add key: wget http://packages.irontec.com/public.key -q -O - | apt-key add -
+apt-get update -y & apt-get upgrade -y
+# neu update loi mongoserver: ln -T /bin/true /usr/bin/systemctl && apt-get update && apt-get install -y mongodb-org && rm /usr/bin/systemctl
+sudo apt-get install -y libgcrypt20
+dpkg -l | grep libgcrypt
+apt-get remove/purge libgcrypt20
+apt-get install sngrep
+# doi voi Centos 7
+vim /etc/yum.repos.d/irontec.repo
+[irontec]
+name=Irontec RPMs repository
+baseurl=http://packages.irontec.com/centos/$releasever/$basearch/
+#add key : rpm --import http://packages.irontec.com/public.key
+yum install sngrep
+
+########################################################################
+command line: sngrep
+Màn hình giám sát có các thông tin: Method, SIP From, SIP to, Msgs, Source, Destination, Call State.
+sngrep cho phép lọc các bản tin theo các thông số, theo bản tin, phím F7.
+Lưu các bản tin ra file PCAP để có thể xem trên phần mềm khác, phím F2.
