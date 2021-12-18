@@ -1,0 +1,91 @@
+# Note that: Tệp docker-compose này sẽ cho thấy tất cả các lệnh của docker-compose sẽ được thực thi như nào
+version: '2' # sử dụng version 2
+
+services:
+  freepbx-app: # đặt tên dịch vụ container
+    # thiết lập tên cho container sau khi hoàn tất 
+    container_name: freepbx-app 
+    # tự dộng tìm dến file Dockerfile và xây dựng chúng, ví dụ : build: .. hoặc cách như bên dưới
+    build: 
+      context: .. # chỉ mục đến thư mục chứa Dockerfile
+      dockerfile: Dockerfile # chỉ áp dụng với tập tin Dockerfile
+    # mở port và ánh xạ port ra ngoài hay còn gọi là map port còn : là khoảng cách phân chia rõ 2 bên,
+    # 1 bên là localhost cho máy vật lý vị trí cánh trái và 1 bên là host cho máy ảo tức thằng container vị trí cánh phải
+    # ví dụ : localhost:virtualhost
+    ports: 
+      - 8080:8080
+      - 5060:5060/udp
+      - 5160:5160/udp
+      - 18000-18100:18000-18100/udp
+      - 4445:4445
+      - 55000:55000
+    # Ánh xạ thử mục ổ đĩa hay còn gọi là mount map, có 2 dạng : 1 là bind mount và 2 là vollumn
+    # phân biệt: bind mount không được quản lý bởi docker còn volume dành cho docker
+    # thứ 2: volumn dành cho virtualhót, docker container còn bind mount là dành cho thiết bị vật lý như windows macos, linux 
+    volumes: 
+      - ./certs:/certs
+      - ./data:/data
+      - ./logs:/var/log
+      - ./data/www:/var/www/html
+    # Thêm các biến môi trường từ một tệp. Có thể là một giá trị đơn lẻ hoặc một danh sách, thêm cho đủ bộ
+    env_file: ../.env
+    environment: 
+      - ADMIN_DIRECTORY=/admin
+      - VIRTUAL_HOST=hostname.example.com
+      - VIRTUAL_NETWORK=host
+      - VIRTUAL_PORT=80
+      - HTTP_PORT=8080
+      - HTTPS_PORT=1443
+      - RTP_START=10000
+      - RTP_FINISH=65000
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - freepbx-db # Dịch vụ này phụ thuộc vào mysql. Bắt đầu điều đó đầu tiên
+    # tiến trình sau khi hoàn tất sẽ restart
+    restart: always 
+    networks:
+      # sd mạng bridge
+      freepbx-network:
+        ipv4_address: 172.20.0.6
+    extra_hosts:
+    # Ánh xạ địa chỉ ip locahost vs virutual host : sd cli như sau --add-host
+    # cú pháp show ip container mặc định 172.17.0.1
+    # ip addr show | grep "\binet\b.*\bdocker0\b" | awk '{print $2}' | cut -d '/' -f 1
+      - "host.docker.internal:172.17.0.1"
+    # Kiểm tra vùng chứa xem thế nào
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    privileged: true
+  # Database host
+  ## Sử dụng cho Máy chủ MySQL Bên ngoài
+  #dbs được thiết lập bên dưới sd mariabd - mysql 
+  freepbx-db:
+    container_name: freepbx-db
+    image: tiredofit/mariadb
+    ports:
+      - "3306:3306"
+    restart: always
+    volumes:
+      - ./db:/var/lib/mysql
+    # thiết lập môi trường dbs bên ngoài
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_DATABASE=asterisk
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=admin@12345
+    networks:
+      freepbx-network:
+        ipv4_address: 172.20.0.5
+# set ip container static
+networks:
+  freepbx-network: # tên mạng
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24 # /24 chỉ subnet mask phân chia cho 254 thiết bị trong cùng mạng nội bộ chứa container
+          gateway: 172.20.0.1
+        

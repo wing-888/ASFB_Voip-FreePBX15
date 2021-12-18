@@ -33,14 +33,14 @@ mysql || or mysql -D asterisk || or mysql -uroot -p
 
 >Then create your user and password with the following
 
-    CREATE USER ‘someuser’@’%’ IDENTIFIED BY ‘somepassword’;
+    CREATE USER 'someuser@'%' IDENTIFIED BY 'somepassword';
 
 >Define from where the resource can connect , we’ll use anywhere
 
     GRANT USAGE ON *.* TO 'someuser'@'someipaddress' IDENTIFIED BY 'somepassword'; 
     GRANT SELECT ON asteriskcdrdb.* TO 'someuser'@'someipaddress' identified by 'somepassword';
     <>> or
-    grant select on asteriskcdrdb.* TO ‘someuser’@’%’;
+    grant select on asteriskcdrdb.* TO 'someuser'@'%';
 
 >Finally apply the new permissions with
 
@@ -53,12 +53,12 @@ mysql || or mysql -D asterisk || or mysql -uroot -p
 
 ## Centos 7:
 ```sh
-    iptables -A INPUT -s localhost -p tcp --destination-port 3306 -j ACCEPT
-    iptables -A INPUT -s 192.168.1.25 -p tcp --destination-port 3306 -j ACCEPT
-    iptables -A INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
-    firewall-cmd --permanent --add-port=3306/tcp
-    iptables-save
-    iptables-save | grep 3306
+        iptables -A INPUT -s localhost -p tcp --destination-port 3306 -j ACCEPT
+        iptables -A INPUT -s 192.168.1.25 -p tcp --destination-port 3306 -j ACCEPT
+        iptables -A INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
+        firewall-cmd --permanent --add-port=3306/tcp
+        iptables-save
+        iptables-save | grep 3306
     Ubuntu
     ufw allow 3306/tcp
     ufw reload
@@ -90,3 +90,32 @@ Beside you can change password default or foget
 After >>>
 
     update user set password = password('HhKnrTBV8do5Byna6GRu') where user = 'freepbxuser';
+
+## @`EDIT`@ > :
+>Địa chỉ ràng buộc đã được đặt thành 0.0.0.0 như được hiển thị với truy vấn 
+    
+    show global variables like 'bind_address';
+    =====>
+        +---------------+-----------+
+        | Variable_name | Value     |
+        +---------------+-----------+
+        | bind_address  | 127.0.0.1 |
+        +---------------+-----------+
+        1 row in set (0.00 sec)
+    Or: outside
+    mysqld --verbose --help | grep bind-address
+    ======>
+        2021-12-17 10:58:03 0 [Note] Plugin 'FEEDBACK' is disabled.
+        --bind-address=name IP address to bind to.
+        bind-address                                               127.0.0.1
+>Kiêm tra host Dbs
+
+    select host, user from mysql.user;
+    ======>
+        +-----------+-------------+
+        | host      | user        |
+        +-----------+-------------+
+        | localhost | freepbxuser |
+        | localhost | root        |
+        +-----------+-------------+
+        2 rows in set (0.000 sec)
