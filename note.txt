@@ -104,21 +104,3 @@ command line: sngrep
 Màn hình giám sát có các thông tin: Method, SIP From, SIP to, Msgs, Source, Destination, Call State.
 sngrep cho phép lọc các bản tin theo các thông số, theo bản tin, phím F7.
 Lưu các bản tin ra file PCAP để có thể xem trên phần mềm khác, phím F2.
-
-#.env
-COMPOSE_HTTP_TIMEOUT=200
-INSTALL_ADDITIONAL_MODULES=timeconditions
-INSTALL_ADDITIONAL_MODULES=setcid
-INSTALL_ADDITIONAL_MODULES=certman
-INSTALL_ADDITIONAL_MODULES=calendar
-INSTALL_ADDITIONAL_MODULES=webrtc
-INSTALL_ADDITIONAL_MODULES=ringgroups
-INSTALL_ADDITIONAL_MODULES=backup
-INSTALL_ADDITIONAL_MODULES=ivr
-INSTALL_ADDITIONAL_MODULES=cel
-INSTALL_ADDITIONAL_MODULES=userman
-INSTALL_ADDITIONAL_MODULES=api
-INSTALL_ADDITIONAL_MODULES=restapi
-INSTALL_ADDITIONAL_MODULES=queues
-INSTALL_ADDITIONAL_MODULES=sysadmin
-INSTALL_ADDITIONAL_MODULES=firewall

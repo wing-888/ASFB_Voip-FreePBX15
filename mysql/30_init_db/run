@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+
+source /assets/functions/00-container # Kéo tất cả các hàm vùng chứa tùy chỉnh từ hình ảnh này
+# shellcheck disable=SC2034
+PROCESS_NAME="mariadb-initdb"
+
+check_container_initialized
+check_service_initialized 10-mariadb
+liftoff
+## run mysql script
+sudo mysql -u root -p'password' -D asterisk -e "INSERT INTO ampusers (username,password_sha1,sections) VALUES ('admin', SHA1('admin'),'*');"
+echo "Create user Successfully!!!"

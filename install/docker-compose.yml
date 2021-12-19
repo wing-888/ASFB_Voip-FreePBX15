@@ -2,6 +2,7 @@
 version: '2' # sử dụng version 2
 
 services:
+# /============================================FreePBX-Asterisk==================================================\
   freepbx-app: # đặt tên dịch vụ container
     # thiết lập tên cho container sau khi hoàn tất 
     container_name: freepbx-app 
@@ -39,8 +40,17 @@ services:
       - RTP_START=10000
       - RTP_FINISH=65000
       - CHOKIDAR_USEPOLLING=true
-    depends_on:
-      - freepbx-db # Dịch vụ này phụ thuộc vào mysql. Bắt đầu điều đó đầu tiên
+      # DATABASSES
+      # kết nối tới databases: mysql -uasterisk -p'asterisk' -D asterisk -h freepbx-db
+      - DB_EMBEDDED=FALSE
+      # Dịch vụ này phụ thuộc vào mariadb-mýsql. Bắt đầu điều đó đầu tiên
+      # Dịch vụ host ở đây cho phép chúng ta nhảy đến môi trường container databases
+      - DB_HOST=freepbx-db 
+      - ROOT_PASS=password
+      - DB_NAME=asterisk
+      - DB_USER=asterisk
+      - DB_PASS=asterisk
+      - DB_PORT=3306
     # tiến trình sau khi hoàn tất sẽ restart
     restart: always 
     networks:
@@ -60,9 +70,11 @@ services:
       retries: 3
       start_period: 40s
     privileged: true
+# /============================================MARIADB-MySQL==================================\    
   # Database host
-  ## Sử dụng cho Máy chủ MySQL Bên ngoài
-  #dbs được thiết lập bên dưới sd mariabd - mysql 
+  # Sử dụng cho Máy chủ MySQL Bên ngoài
+  # dbs được thiết lập bên dưới sd mariabd - mysql 
+  # mariabd có sẵn không hỗ trợ tập tin .sql
   freepbx-db:
     container_name: freepbx-db
     image: tiredofit/mariadb
@@ -71,21 +83,52 @@ services:
     restart: always
     volumes:
       - ./db:/var/lib/mysql
+      # tập tin dưới dây cho phép khởi tạo hay chỉnh sửa cấu hình trong databases
+      # chú ý: do sử dụng images có sẵn, ở đây không hỗ trợ tệp sql
+      - ../mysql/30_init_db/:/etc/services.available/30_init_db/
     # thiết lập môi trường dbs bên ngoài
     environment:
-      - MYSQL_ROOT_PASSWORD=password
+      # % == any host tức là remote với bất kỳ ip, ngoài ra có thể cho cố định ip nhưng đây là bản kiểm thử nên để any
+      # thiết lập cấu hình databases
       - MYSQL_ROOT_HOST=%
-      - MYSQL_DATABASE=asterisk
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=admin@12345
+      - DB_NAME=asterisk
+      - DB_USER=asterisk
+      - DB_PASS=asterisk
+      - ROOT_PASS=password
+      - DB_BACKUP=TRUE
     networks:
       freepbx-network:
         ipv4_address: 172.20.0.5
-# set ip container static
+# /============================================MARIADB-MySQL-BACKUP==================================\    
+  freepbx-db-backup:
+    container_name: freepbx-db-backup
+    image: tiredofit/db-backup
+    links:
+     - freepbx-db
+    volumes:
+      - ./dbbackup:/backup
+    environment:
+      - ZABBIX_HOSTNAME=freepbx-db-backup
+      - DB_HOST=freepbx-db
+      - DB_TYPE=mariadb
+      - DB_NAME=asterisk
+      - DB_USER=asterisk
+      - DB_PASS=asteriskpass
+      - DB_DUMP_FREQ=1440
+      - DB_DUMP_BEGIN=0000
+      - DB_CLEANUP_TIME=8640
+      - COMPRESSION=BZ
+      - MD5=TRUE
+    networks:
+      freepbx-network:
+        ipv4_address: 172.20.0.3
+    restart: always
+# /============================================NETWORK=========================================\    
+# thiết lập mạng cho container
 networks:
   freepbx-network: # tên mạng
     ipam:
       config:
         - subnet: 172.20.0.0/24 # /24 chỉ subnet mask phân chia cho 254 thiết bị trong cùng mạng nội bộ chứa container
-          gateway: 172.20.0.1
+          gateway: 172.20.0.1 # đường đi bao giờ cũng phải đúng, sai lệch là ko lên hình
         

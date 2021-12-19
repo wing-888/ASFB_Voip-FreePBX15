@@ -2,10 +2,10 @@
 
 # chú ý: việc tạo sẵn token trên cli hay curl sẽ không hoàn hảo nếu sử dụng WebGui bằng tay
 # tao nguoi dung qua post va lay cookie
-curl -X POST 'http://localhost:8080/admin/config.php' \
-    -d 'action=setup_admin&username=admin&password1=admin&password2=admin&email=vudat412@gmail.com&system_ident=VoIP+Server&auto_module_updates=enabled&auto_module_security_updates=enabled&unsigned_module_emails=enabled&update_every=saturday&update_period=4to8' \
-    -c /var/www/html/cookieLogin.json
-    -c nếu muốn lưu lại cookie user
+# curl -X POST 'http://localhost:8080/admin/config.php' \
+#     -d 'action=setup_admin&username=admin&password1=admin&password2=admin&email=vudat412@gmail.com&system_ident=VoIP+Server&auto_module_updates=enabled&auto_module_security_updates=enabled&unsigned_module_emails=enabled&update_every=saturday&update_period=4to8' \
+#     -c /var/www/html/cookieLogin.json
+#     -c nếu muốn lưu lại cookie user
 # thiet lap ngon ngu english
 curl -X POST 'http://localhost:8080/admin/config.php' \
     -d 'username=admin&password=admin&oobeSoundLang=en&oobeGuiLang=en_US'
