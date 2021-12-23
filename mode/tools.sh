@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# /============================================ Cài đặt công cụ phân tích gói tin ==========================================\
+# SNGREP
 echo "deb http://packages.irontec.com/debian stretch main" >>/etc/apt/sources.list
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 90D20F5ED8C20040
 wget http://packages.irontec.com/public.key -q -O - | apt-key add –
@@ -12,3 +15,5 @@ apt-get install mongodb-org-server -y
 apt-get update -y
 wait
 apt-get install -y sngrep
+
+# 

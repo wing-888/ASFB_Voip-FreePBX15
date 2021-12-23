@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/usr/bin/env bash
 
 source /assets/functions/00-container # Kéo tất cả các hàm vùng chứa tùy chỉnh từ hình ảnh này
 # shellcheck disable=SC2034
@@ -7,6 +7,33 @@ PROCESS_NAME="mariadb-initdb"
 check_container_initialized
 check_service_initialized 10-mariadb
 liftoff
+
+# /============================================ RUN Source Khi Dịch vụ được khởi động ==========================================\
+# Chú ý : Do folder này mount tức anh xạ trong images cho nên ko được chỉnh sửa khi quá trình đang diễn ra hay hoàn tất vì nó sẽ 
+# thay đổi 1 số tiến trình hoạt động
+# đây là thư mục hoạt động của dịch vụ 
 ## run mysql script
-sudo mysql -u root -p'password' -D asterisk -e "INSERT INTO ampusers (username,password_sha1,sections) VALUES ('admin', SHA1('admin'),'*');"
-echo "Create user Successfully!!!"
+# gán biến cho sẵn
+USER=root
+PASSWORD=password
+DATABASE=asterisk
+USERNAME=admin
+TABLE=ampusers
+DBNAME=freepbx-db
+# đối với file bash shell câu điều kiện if else elif sẽ được kết thúc bằng fi 
+# trường hợp thực thi sql trong điều kiện để khởi chạy select * from ta cần exec tức là thực thi câu lệnh: ta sử dụng `begin` để bắt đầu và end để kết thúc câu lệnh sql
+
+# gán biến với câu lệnh dưới đồng thời cắt phần tử khi gán biến luôn, -N để cắt cột đầu tiên đối với SQL khi này biến sẽ sinh ra 0 hoặc 1 với lệnh select exists
+# phải sử dụng sudo bởi vì nên thùng chứa container databases mặc định ở dạng user cho nên cần quyền để truy cập 
+RESULT="`sudo mysql -u$USER -p$PASSWORD -D $DATABASE -N -e "SELECT EXISTS(SELECT * FROM ampusers where username = 'admin');"`"
+# điều kiện khi kết quả trả về, ở đây là chưa có giá trị nào
+if [ "$RESULT" == 0 ]
+then 
+# chèn giá trị vào databases
+    sudo mysql -u$USER -p$PASSWORD -D $DATABASE -e "INSERT INTO ampusers (username,password_sha1,sections) VALUES ('admin', SHA1('admin'),'*');"
+elif [ "$RESULT" == 1 ]
+# điều kiện khi đã có giá trị trong cơ sở dữ liệu
+then 
+# câu lệnh dưới cho thấy chèn khi đã có dữ liệu nhưng đồng thời bỏ qua nếu bị trùng || IGNORE sẽ bỏ qua những gì cho là true 
+    sudo mysql -u$USER -p$PASSWORD -D $DATABASE -e "INSERT IGNORE INTO ampusers (username,password_sha1,sections) VALUES ('admin', SHA1('admin'),'*');"
+fi

@@ -104,3 +104,10 @@ command line: sngrep
 Màn hình giám sát có các thông tin: Method, SIP From, SIP to, Msgs, Source, Destination, Call State.
 sngrep cho phép lọc các bản tin theo các thông số, theo bản tin, phím F7.
 Lưu các bản tin ra file PCAP để có thể xem trên phần mềm khác, phím F2.
+
+########################################################################
+Đã tắt kết nối mạng Docker: CẢNH BÁO: Chuyển tiếp IPv4 bị tắt. Kết nối mạng sẽ không hoạt động
+vim /etc/sysctl.conf 
+thêm : net.ipv4.ip_forward=1
+systemctl restart network
+sysctl net.ipv4.ip_forward

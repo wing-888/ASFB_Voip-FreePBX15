@@ -20,6 +20,7 @@ services:
       - 18000-18100:18000-18100/udp
       - 4445:4445
       - 55000:55000
+      - 4000:4000
     # Ánh xạ thử mục ổ đĩa hay còn gọi là mount map, có 2 dạng : 1 là bind mount và 2 là vollumn
     # phân biệt: bind mount không được quản lý bởi docker còn volume dành cho docker
     # thứ 2: volumn dành cho virtualhót, docker container còn bind mount là dành cho thiết bị vật lý như windows macos, linux 
