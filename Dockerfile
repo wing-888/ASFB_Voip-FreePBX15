@@ -33,6 +33,22 @@ USER root
 ADD start.sh /etc/cont-init.d/
 # cập nhật quyền cho thư mục vì trong thư mục này cần phải có quyền để thực thi
 RUN chmod u+x /etc/cont-init.d/start.sh
+# /---------------------------------WEBRTC--------------------------------\
+# |======================================================================|
+# tạo thư mục để chứa app calltime
+# git clone sẽ tải xuống thư mục hiện có
+# npm install để init package cho tập tin 
+RUN mkdir /root/Webrtc && \
+    cd /root/Webrtc && \
+    git clone https://github.com/CompanyDATV/Webrtc-Voip-Index.git . && \
+    npm install
+WORKDIR /root/Webrtc
+# khởi chạy khi container start thừng chứa || khởi chạy song song dịch vụ 
+# mở trình duyệt chạy iphost:4000
+# ip host xem trong file env || DOCKER_HOST_IP=X.X.X.X
+CMD [ "npm", "start" ]
+
+WORKDIR /root/
 # /---------------------------------PORT--------------------------------\
 # mở cổng cho images được đóng gói khi khởi tạo
 EXPOSE 8080

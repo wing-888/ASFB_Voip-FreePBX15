@@ -5,6 +5,7 @@
 # cài đặt module
 apt-get update -y
 apt-get install vim -y
+apt-get install git -y
 # upgrade module | cập nhật thêm
 fwconsole ma downloadinstall core --edge
 fwconsole chown
@@ -19,12 +20,15 @@ apt-get update -y
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A INPUT -p udp -m udp --dport 5060 -j ACCEPT
 iptables -A INPUT -p udp -m udp --dport 10000:65000 -j ACCEPT
+iptables -A INPUT -p udp -m udp --dport 55000:55000 -j ACCEPT
 apt-get install ufw -y
 ufw enable
 ufw allow 10000:65000/udp
 ufw allow 5060/udp
+ufw allow 55000/udp
 # ufw allow 80/tcp  
 ufw allow 8080/tcp
+ufw allow 4000/tcp
 ufw reload
 fwconsole ma updateall
 wait

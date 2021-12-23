@@ -31,17 +31,17 @@ curl -X POST 'http://localhost:8080/admin/ajax.php?module=api&command=add_applic
     --cookie "PHPSESSID=$cookie" \
     -d 'type=client_credentials&name=API&description=GRAPH+API&website=&redirect=&allowed_scopes=gql&user=' > /var/www/html/token.json
 # Cách 2: --form 
-curl -X POST 'http://localhost:8080/admin/ajax.php?module=api&command=add_application' \
-    --header 'Referer: http://localhost:8080/admin/config.php?display=api' \
-    --cookie "PHPSESSID=$cookie" \
-    --form 'type="client_credentials"' \
-    --form 'name="API2"' \
-    --form 'description="GRAPH+API"' \
-    --form 'allowed_scopes="gql"' \
-    --form 'website=""' \
-    --form 'redirect=""' \
-    --form 'user=""' \
-    > /var/www/html/token.json
+# curl -X POST 'http://localhost:8080/admin/ajax.php?module=api&command=add_application' \
+#     --header 'Referer: http://localhost:8080/admin/config.php?display=api' \
+#     --cookie "PHPSESSID=$cookie" \
+#     --form 'type="client_credentials"' \
+#     --form 'name="API2"' \
+#     --form 'description="GRAPH+API"' \
+#     --form 'allowed_scopes="gql"' \
+#     --form 'website=""' \
+#     --form 'redirect=""' \
+#     --form 'user=""' \
+#     > /var/www/html/token.json
 
 # /============================================ Curl POST Tạo API GRAPHQL ==========================================\
 # sử dụng 2 key để gen khóa
