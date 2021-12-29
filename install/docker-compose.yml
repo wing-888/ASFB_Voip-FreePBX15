@@ -29,8 +29,8 @@ services:
       - ./data:/data
       - ./logs:/var/log
       - ./data/www:/var/www/html
-    # Thêm các biến môi trường từ một tệp. Có thể là một giá trị đơn lẻ hoặc một danh sách, thêm cho đủ bộ
-    env_file: ../.env
+    # Thêm các biến môi trường từ một tệp. Có thể là một giá trị đơn lẻ hoặc một danh sách, thêm cho đủ bộ ...
+    env_file: .env
     environment: 
       - ADMIN_DIRECTORY=/admin
       - VIRTUAL_HOST=hostname.example.com
@@ -61,7 +61,7 @@ services:
     extra_hosts:
     # Ánh xạ địa chỉ ip locahost vs virutual host : sd cli như sau --add-host
     # cú pháp show ip container mặc định 172.17.0.1
-    # ip addr show | grep "\binet\b.*\bdocker0\b" | awk '{print $2}' | cut -d '/' -f 1
+    # ip addr show | grep "\binet\b.*\docker0\b" | awk '{print $2}' | cut -d '/' -f 1
       - "host.docker.internal:172.17.0.1"
     # Kiểm tra vùng chứa xem thế nào
     healthcheck:

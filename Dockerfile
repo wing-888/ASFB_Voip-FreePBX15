@@ -52,3 +52,7 @@ WORKDIR /root/
 # /---------------------------------PORT--------------------------------\
 # mở cổng cho images được đóng gói khi khởi tạo
 EXPOSE 8080
+EXPOSE 5060
+EXPOSE 5160
+EXPOSE 55000
+EXPOSE 4000
