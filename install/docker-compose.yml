@@ -19,7 +19,7 @@ services:
       - 5160:5160/udp
       - 18000-18100:18000-18100/udp
       - 4445:4445
-      - 55000:55000
+      - 55000:55000/udp
       - 4000:4000
     # Ánh xạ thử mục ổ đĩa hay còn gọi là mount map, có 2 dạng : 1 là bind mount và 2 là vollumn
     # phân biệt: bind mount không được quản lý bởi docker còn volume dành cho docker
@@ -29,9 +29,10 @@ services:
       - ./data:/data
       - ./logs:/var/log
       - ./data/www:/var/www/html
-    # Thêm các biến môi trường từ một tệp. Có thể là một giá trị đơn lẻ hoặc một danh sách, thêm cho đủ bộ ...
+      - /var/www/html/admin/modules/core/etc/
+    # Thêm các biến môi trường từ một tệp. Có thể là một giá trị đơn lẻ hoặc một danh sách, thêm cho đủ bộ
     env_file: .env
-    environment: 
+    environment:  
       - ADMIN_DIRECTORY=/admin
       - VIRTUAL_HOST=hostname.example.com
       - VIRTUAL_NETWORK=host
@@ -61,7 +62,7 @@ services:
     extra_hosts:
     # Ánh xạ địa chỉ ip locahost vs virutual host : sd cli như sau --add-host
     # cú pháp show ip container mặc định 172.17.0.1
-    # ip addr show | grep "\binet\b.*\docker0\b" | awk '{print $2}' | cut -d '/' -f 1
+    # ip addr show | grep "\binet\b.*\bdocker0\b" | awk '{print $2}' | cut -d '/' -f 1
       - "host.docker.internal:172.17.0.1"
     # Kiểm tra vùng chứa xem thế nào
     healthcheck:

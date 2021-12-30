@@ -48,11 +48,10 @@ WORKDIR /root/Webrtc
 # ip host xem trong file env || DOCKER_HOST_IP=X.X.X.X
 CMD [ "npm", "start" ]
 
-WORKDIR /root/
 # /---------------------------------PORT--------------------------------\
 # mở cổng cho images được đóng gói khi khởi tạo
 EXPOSE 8080
+EXPOSE 4000
+EXPOSE 55000
 EXPOSE 5060
 EXPOSE 5160
-EXPOSE 55000
-EXPOSE 4000

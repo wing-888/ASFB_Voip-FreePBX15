@@ -111,3 +111,15 @@ vim /etc/sysctl.conf
 thêm : net.ipv4.ip_forward=1
 systemctl restart network
 sysctl net.ipv4.ip_forward
+
+
+tree 
+ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head
+
+
+chown -R asterisk /var/spool/asterisk /var/lib/asterisk /var/run/asterisk
+
+vim /etc/default/asterisk
+AST_USER="asterisk"
+AST_GROUP="asterisk"
+

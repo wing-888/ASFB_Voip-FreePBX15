@@ -9,32 +9,60 @@ Thay đổi tệp để làm dự phòng
     mv /etc/asterisk/sip.conf /etc/asterisk/sip.conf.backup
 ```bash    
 cat <<EOF >/etc/asterisk/sip.conf
-[general]   
+[general]
 context=internal
-allowguest=no
+allowhuest=no
 allowoverlap=no
-bindport=5060
-bindaddr=0.0.0.0
+bindport=55000
 srvlookup=no
+udpbindaddr=0.0.0.0
+tcpbindaddr=0.0.0.0
+tcpenable=no
+qualify=yes
+
+[authentication]
+
+[basic-options](!)
+dtmfmode=rfc283
+context=from-office
+type=friend
+
+[natted-phone](!,basic-options)
+direcmedia=no
+host=dynamic
+
+[public-phone](!,basic-options)
+directmedia=yes
+
+[my-codecs](!)
 disallow=all
 allow=ulaw
-alwaysauthreject=yes
-canreinvite=no
-nat=yes
-session-timers=refuse
-localnet=192.168.1.0/255.255.255.0
+allow=gsm
+allow=g723
+allow=ilbc
+allow=g729
+allow=alaw
+
+[ulaw-phone](!)
+disallow=all
+allow=ulaw
 
 [100]
+username=100
 type=friend
 host=dynamic
 secret=vudat412
 context=internal
+qualify=yes
+alow=ulaw, alaw
 
 [101]
+username=101
 type=friend
 host=dynamic
 secret=vudat412
-context=internal
+allow=ulaw,alaw
+qualify=yes
 EOF
 ```
 
@@ -42,17 +70,13 @@ EOF
 ```bash    
 cat << EOF > /etc/asterisk/extensions.conf 
 [internal]
-exten => 100,1,Answer()
-exten => 100,2,Dial(SIP/100,60)
-exten => 100,3,Playback(vm-nobodyavail)
-exten => 100,4,VoiceMail(100@main)
-exten => 100,5,Hangup()
+exten => 100,1,NoOp(calling 100)
+exten => n,Dial(SIP/100,20)
+exten => n,Hangup
 
-exten => 101,1,Answer()
-exten => 101,2,Dial(SIP/101,60)
-exten => 101,3,Playback(vm-nobodyavail)
-exten => 101,4,VoiceMail(100@main)
-exten => 101,5,Hangup()
+exten => 101,1,NoOp(calling 101)
+exten => n,Dial(SIP/101,20)
+exten => n,Hangup
 EOF
 ```
 
