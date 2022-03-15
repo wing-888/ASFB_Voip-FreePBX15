@@ -3,7 +3,7 @@
 apt-get update -y
 apt-get install vim -y
 # upgrade module
-fwconsole downloadinstall core --edge
+fwconsole ma downloadinstall core --edge
 fwconsole ma upgradeall
 #etc.
 echo "permitsion key \n"
